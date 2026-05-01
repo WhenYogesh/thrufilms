@@ -15,7 +15,7 @@ const budgetLabels: Record<string, string> = {
 const budgetIcons: Record<string, string> = {
   paid: "💰",
   unpaid: "🎓",
-  collaboration: "🤝",
+  collaboration: "🤝 .",
 };
 
 export default function PostDetail() {
