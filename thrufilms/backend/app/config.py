@@ -1,17 +1,23 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from typing import Optional
 
 
 class Settings(BaseSettings):
+    # Database (fallback to SQLite if not provided)
     DATABASE_URL: str = "sqlite:///./thrufilms.db"
-    SECRET_KEY: str = "change-me-in-production-use-a-long-random-string"
+
+    # Security
+    SECRET_KEY: str = "super-secret-key-change-this"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
 
-    CLOUDINARY_CLOUD_NAME: str = ""
-    CLOUDINARY_API_KEY: str = ""
-    CLOUDINARY_API_SECRET: str = ""
+    # Cloudinary (optional → prevent crash)
+    CLOUDINARY_CLOUD_NAME: Optional[str] = None
+    CLOUDINARY_API_KEY: Optional[str] = None
+    CLOUDINARY_API_SECRET: Optional[str] = None
 
+    # Frontend (safe default)
     FRONTEND_URL: str = "http://localhost:5173"
 
     class Config:
