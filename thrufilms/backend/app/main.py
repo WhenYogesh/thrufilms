@@ -1,3 +1,5 @@
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
@@ -12,13 +14,28 @@ from app.models.application import Application  # noqa: F401
 from app.models.vote import Vote  # noqa: F401
 from app.models.comment import Comment  # noqa: F401
 
-# Create all tables
-Base.metadata.create_all(bind=engine)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup / shutdown lifecycle."""
+    # ── Startup ──
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully.")
+    except Exception as exc:
+        logger.error("Failed to create database tables: %s", exc)
+        raise
+    yield
+    # ── Shutdown ──
+
 
 app = FastAPI(
     title="ThruFilms API",
     description="Local film networking platform - Where Local Films Find Their Crew",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS
@@ -35,12 +52,6 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(posts.router)
 app.include_router(applications.router)
-
-
-@app.on_event("startup")
-def startup_seed():
-    """Startup event. Removed fake data seeding as per user request."""
-    pass
 
 
 @app.get("/", tags=["Health"])

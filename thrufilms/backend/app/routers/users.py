@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import cast, String
 from typing import List, Optional
 from app.database import get_db
 from app.models.user import User
@@ -42,9 +43,8 @@ def list_users(
     if location:
         query = query.filter(Profile.location.ilike(f"%{location}%"))
     if skill:
-        # JSON contains check — works for SQLite and PostgreSQL differently
-        # Using basic LIKE for compatibility
-        query = query.filter(Profile.skills.astext.contains(skill))
+        # Cast JSON column to text for cross-database LIKE search
+        query = query.filter(cast(Profile.skills, String).ilike(f"%{skill}%"))
 
     return query.offset(skip).limit(limit).all()
 
